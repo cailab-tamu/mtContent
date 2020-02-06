@@ -1,6 +1,7 @@
 # Size of the figures should be a single (86 mm) or double (178 mm) column width.
 library(ggplot2)
 library(ggjoy)
+theme_update(text = element_text(size=20))
 
 # fileList <- list.files('Results/', full.names = TRUE)
 # fContent <- lapply(fileList, function(X){
@@ -136,7 +137,7 @@ C10X <- C10X[C10X$TISSUE %in% names(tTISSUE)[tTISSUE > 2000],]
 C10X$TISSUE[C10X$TISSUE == 'Circulating tumor cells in hepatocellular carcinoma'] <- 'Hepatocellular carcinoma'
 
 p <- ggplot(C10X, aes(x=TISSUE, y=MTRATIO)) + 
-  geom_boxplot(outlier.shape = NA) + theme_bw() + coord_flip() +
+  geom_boxplot(outlier.shape = NA) + theme_bw(base_size = 10) + coord_flip() +
   geom_jitter(shape=16, position=position_jitter(0.2), cex = 0.05, alpha = 0.1) + 
   geom_hline(yintercept = 0.05, lty = 2, col = 'red') + 
   geom_hline(yintercept = 0.1, lty = 2, col = 'blue') +
