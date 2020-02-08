@@ -86,8 +86,6 @@ print(p)
 dev.off()
 
 
-
-
 p <- ggplot(MT, aes(x=CAT, y=MTRATIO)) +  
   geom_boxplot(outlier.shape = NA) + theme_bw() + coord_flip() +
   geom_jitter(shape=16, position=position_jitter(0.2), cex = 0.05, alpha = 0.1) + 
