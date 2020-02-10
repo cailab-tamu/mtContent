@@ -20,7 +20,8 @@ length(levels(fContent$SRA))
 
 
 MT <- fContent
-MT <- MT[MT$MTRATIO != 0,]
+table(MT$MTCOUNT != 0)
+MT <- MT[MT$MTCOUNT != 0,]
 MT <- as.data.frame.array(MT)
 MT <- MT[order(MT$TOTALCOUNT),]
 MT$log10MTCOUNT <- log10(MT$MTCOUNT)
@@ -35,20 +36,23 @@ MT$expGENEupr <- expectedGENE$upr
 
 MT$CAT <- paste0(MT$PROTOCOL, ' - ', MT$SP)
 CORVAL <- cor(MT$NGENES,MT$TOTALCOUNT, method = 'sp')
+cor.test(MT$NGENES,MT$TOTALCOUNT, method = 'sp')
 
+# p <- ggplot(MT, aes(x=log10TOTALCOUNT, y=log10NGENES)) + 
+#   geom_point(cex = 0.1, alpha = 0.05) + xlab(parse(text = expression('log[10](Total~Counts)'))) +
+#   geom_smooth(method=lm , color="red", se = FALSE, formula = y ~poly(x,2)) +
+#   ylab(parse(text = expression('log[10](Total~Number~of~Genes)'))) +
+#   geom_line(aes(y=expGENElwr), color = "red", linetype = "dashed")+
+#   geom_line(aes(y=expGENEupr), color = "red", linetype = "dashed")+
+#   theme_bw() + labs(subtitle = parse(text = paste0('rho==', round(CORVAL,2))))
+# 
+# png('Figures/FigureS1.png', width = 86, height = 86, res = 200,  units = 'mm')
+# print(p)
+# dev.off()
 
-p <- ggplot(MT, aes(x=log10TOTALCOUNT, y=log10NGENES)) + 
-  geom_point(cex = 0.1, alpha = 0.05) + xlab(parse(text = expression('log[10](Total~Counts)'))) +
-  geom_smooth(method=lm , color="red", se = FALSE, formula = y ~poly(x,2)) +
-  ylab(parse(text = expression('log[10](Total~Number~of~Genes)'))) +
-  geom_line(aes(y=expGENElwr), color = "red", linetype = "dashed")+
-  geom_line(aes(y=expGENEupr), color = "red", linetype = "dashed")+
-  theme_bw() + labs(subtitle = parse(text = paste0('rho==', round(CORVAL,2))))
-
-png('Figures/FigureS1.png', width = 86, height = 86, res = 200,  units = 'mm')
-print(p)
-dev.off()
-
+table(MT$log10NGENES > MT$expGENElwr & MT$log10NGENES < MT$expGENEupr)
+table(MT$log10NGENES > MT$expGENElwr)
+table(MT$log10NGENES < MT$expGENEupr)
 MT <- MT[MT$log10NGENES > MT$expGENElwr & MT$log10NGENES < MT$expGENEupr,]
 expectedMT <- predict(lm(MT$log10MTCOUNT~MT$log10TOTALCOUNT), newdata = data.frame(TOTALCOUNT = MT$log10TOTALCOUNT), interval = 'prediction', level = 0.95)
 expectedMT <- as.data.frame(expectedMT)
@@ -57,18 +61,22 @@ MT$expMTCOUNT <- expectedMT$fit
 MT$expMTCOUNTupr <- expectedMT$upr
 
 CORVAL <- cor(MT$log10TOTALCOUNT, MT$log10MTCOUNT)
-p <- ggplot(MT, aes(x=log10TOTALCOUNT, y=log10MTCOUNT)) + 
-  geom_point(cex = 0.1, alpha = 0.05) + geom_smooth(method=lm , color="red", se = FALSE) + 
-  theme_bw() + geom_line(aes(y=expMTCOUNTlwr), color = "red", linetype = "dashed")+
-  geom_line(aes(y=expMTCOUNTupr), color = "red", linetype = "dashed")+
-  xlab(parse(text = expression('log[10](Total~Counts)')))+
-  ylab(parse(text = expression('log[10](Mitochondrial~Counts)')))+
-  labs(subtitle = parse(text = paste0('r ==', round(CORVAL,2))))
+cor.test(MT$log10TOTALCOUNT, MT$log10MTCOUNT)
+# p <- ggplot(MT, aes(x=log10TOTALCOUNT, y=log10MTCOUNT)) +
+#   geom_point(cex = 0.1, alpha = 0.05) + geom_smooth(method=lm , color="red", se = FALSE) +
+#   theme_bw() + geom_line(aes(y=expMTCOUNTlwr), color = "red", linetype = "dashed")+
+#   geom_line(aes(y=expMTCOUNTupr), color = "red", linetype = "dashed")+
+#   xlab(parse(text = expression('log[10](Total~Counts)')))+
+#   ylab(parse(text = expression('log[10](Mitochondrial~Counts)')))+
+#   labs(subtitle = parse(text = paste0('r ==', round(CORVAL,2))))
+# 
+# png('Figures/Figure1.png', width = 86, height = 86, res = 200,  units = 'mm')
+# print(p)
+# dev.off()
 
-png('Figures/Figure1.png', width = 86, height = 86, res = 200,  units = 'mm')
-print(p)
-dev.off()
-
+table(MT$log10MTCOUNT > MT$expMTCOUNTlwr & MT$log10MTCOUNT < MT$expMTCOUNTupr)
+table(MT$log10MTCOUNT > MT$expMTCOUNTlwr)
+table(MT$log10MTCOUNT < MT$expMTCOUNTupr)
 MT <- MT[MT$log10MTCOUNT > MT$expMTCOUNTlwr & MT$log10MTCOUNT < MT$expMTCOUNTupr,]
 
 
@@ -77,13 +85,18 @@ p <- ggplot(MT, aes(x=SP, y=MTRATIO)) +
   theme_bw() + 
   coord_flip() + geom_jitter(shape=16, position=position_jitter(0.1), cex = 0.05, alpha = 0.01) +
   geom_hline(yintercept = 0.05, lty = 2, col = 'red') + 
-  geom_hline(yintercept = 0.15, lty = 2, col = 'blue') +
+  geom_hline(yintercept = 0.1, lty = 2, col = 'blue') +
   xlab('Specie') +
   ylab('Mitochondrial Ratio')
 
 png('Figures/Figure2.png', width = 86, height = 40, res = 200,  units = 'mm')
 print(p)
 dev.off()
+
+wilcox.test(MTRATIO~SP, MT, alternative = 'greater')
+t.test(MTRATIO~SP, MT, alternative = 'greater')
+
+
 
 
 p <- ggplot(MT, aes(x=CAT, y=MTRATIO)) +  
@@ -111,7 +124,7 @@ p <- ggplot(C10X, aes(x=CT, y=MTRATIO)) +
   geom_boxplot(outlier.shape = NA) + theme_bw() + coord_flip() +
   geom_jitter(shape=16, position=position_jitter(0.2), cex = 0.05, alpha = 0.1) + 
   geom_hline(yintercept = 0.05, lty = 2, col = 'red') + 
-  geom_hline(yintercept = 0.15, lty = 2, col = 'blue') +
+  geom_hline(yintercept = 0.1, lty = 2, col = 'blue') +
   xlab('Cell Type') +
   ylab('Mitochondrial Ratio') 
 
@@ -132,7 +145,7 @@ p <- ggplot(C10X, aes(x=CT, y=MTRATIO)) +
   geom_boxplot(outlier.shape = NA) + theme_bw() + coord_flip() +
   geom_jitter(shape=16, position=position_jitter(0.2), cex = 0.05, alpha = 0.1) + 
   geom_hline(yintercept = 0.05, lty = 2, col = 'red') + 
-  geom_hline(yintercept = 0.15, lty = 2, col = 'blue') +
+  geom_hline(yintercept = 0.1, lty = 2, col = 'blue') +
   xlab('Cell Type') +
   ylab('Mitochondrial Ratio') 
 
@@ -154,7 +167,7 @@ p <- ggplot(C10X, aes(x=TISSUE, y=MTRATIO)) +
   geom_boxplot(outlier.shape = NA) + theme_bw() + coord_flip() +
   geom_jitter(shape=16, position=position_jitter(0.2), cex = 0.05, alpha = 0.1) + 
   geom_hline(yintercept = 0.05, lty = 2, col = 'red') + 
-  geom_hline(yintercept = 0.15, lty = 2, col = 'blue') +
+  geom_hline(yintercept = 0.1, lty = 2, col = 'blue') +
   xlab('Tissue') +
   ylab('Mitochondrial Ratio')
 
@@ -162,10 +175,21 @@ png('Figures/Figure4.png', width = 86*1.3, height = 86*1.5, res = 200,  units = 
 print(p)
 dev.off()
 
+pValues <- sapply(unique(C10X$TISSUE), function(X){
+  t.test(C10X[C10X$TISSUE == X,]$MTRATIO, mu = 0.05, alternative = 'less')$p.value
+})
+sum(pValues > 0.05)
+round(mean(pValues > 0.05)*100,1)
+unique(C10X$TISSUE)[pValues > 0.05]
+
 C10X <- MT[MT$PROTOCOL == '10x chromium' & MT$SP == 'Mus musculus' &  MT$CT != 'Unknown',]
 tTISSUE <- table(C10X$TISSUE)
 C10X <- C10X[C10X$TISSUE %in% names(tTISSUE)[tTISSUE > 1000],]
 C10X$TISSUE[C10X$TISSUE == 'Circulating tumor cells in hepatocellular carcinoma'] <- 'Hepatocellular carcinoma'
+C10X$TISSUE[C10X$TISSUE == 'Cortex 1'] <- 'Cortex'
+C10X$TISSUE[C10X$TISSUE == 'Cortex 2'] <- 'Cortex'
+C10X$TISSUE[C10X$TISSUE == 'Cortex 3'] <- 'Cortex'
+
 tT <- table(C10X$TISSUE)
 C10X$TISSUE <- as.factor(C10X$TISSUE)
 levels(C10X$TISSUE) <- paste0(names(tT), ' (', tT, ')')
@@ -174,7 +198,7 @@ p <- ggplot(C10X, aes(x=TISSUE, y=MTRATIO)) +
   geom_boxplot(outlier.shape = NA) + theme_bw(base_size = 10) + coord_flip() +
   geom_jitter(shape=16, position=position_jitter(0.2), cex = 0.05, alpha = 0.1) + 
   geom_hline(yintercept = 0.05, lty = 2, col = 'red') + 
-  geom_hline(yintercept = 0.15, lty = 2, col = 'blue') +
+  geom_hline(yintercept = 0.1, lty = 2, col = 'blue') +
   xlab('Tissue') +
   ylab('Mitochondrial Ratio') 
 
@@ -182,3 +206,12 @@ png('Figures/Figure5.png', width = 86*1.3, height = 86*3.2, res = 200,  units = 
 print(p)
 dev.off()
 
+
+pValues <- sapply(unique(C10X$TISSUE), function(X){
+  t.test(C10X[C10X$TISSUE == X,]$MTRATIO, mu = 0.05, alternative = 'less')$p.value
+})
+sum(pValues > 0.05)
+round(mean(pValues > 0.05)*100,1)
+unique(C10X$TISSUE)[pValues > 0.05]
+
+round((table(MT$PROTOCOL)/nrow(MT))*100,1)
