@@ -182,6 +182,18 @@ sum(pValues > 0.05)
 round(mean(pValues > 0.05)*100,1)
 unique(C10X$TISSUE)[pValues > 0.05]
 
+q75 <- sapply(unique(C10X$TISSUE), function(X){
+  quantile(C10X[C10X$TISSUE == X,]$MTRATIO, 0.75)
+})
+
+
+pValues <- sapply(unique(C10X$TISSUE), function(X){
+  t.test(C10X[C10X$TISSUE == X,]$MTRATIO, mu = 0.1, alternative = 'less')$p.value
+})
+sum(pValues > 0.05)
+round(mean(pValues > 0.05)*100,1)
+unique(C10X$TISSUE)[pValues > 0.05]
+
 C10X <- MT[MT$PROTOCOL == '10x chromium' & MT$SP == 'Mus musculus' &  MT$CT != 'Unknown',]
 tTISSUE <- table(C10X$TISSUE)
 C10X <- C10X[C10X$TISSUE %in% names(tTISSUE)[tTISSUE > 1000],]
@@ -215,3 +227,18 @@ round(mean(pValues > 0.05)*100,1)
 unique(C10X$TISSUE)[pValues > 0.05]
 
 round((table(MT$PROTOCOL)/nrow(MT))*100,1)
+
+
+Hs <- density(MT[MT$SP == 'Homo sapiens',]$MTRATIO, from = 0)
+Hs$y <- Hs$y/sum(Hs$y)
+Mm <- density(MT[MT$SP == 'Mus musculus',]$MTRATIO, from = 0)
+Mm$y <- Mm$y/sum(Mm$y)
+
+png('Figures/FigureS0.png', width = 86, height = 86, res = 200,  units = 'mm')
+par(mar=c(3,3,1,1), mgp = c(1.5,0.5,0))
+plot(Hs, ylim = c(0,0.02), col = 'darkblue', xlab = 'Mitochondrial ratio', ylab = 'Probability', main = '')
+lines(Mm, col = 'forestgreen')
+abline(v = 0.05, col = 'red', lty = 2)
+abline(v = 0.1, col = 'blue', lty = 2)
+legend('topright', legend = c('Human', 'Mice'), col = c('darkblue', 'forestgreen'), lty = 1, bty = 'n', cex = 0.7)
+dev.off()
