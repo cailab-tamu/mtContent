@@ -132,6 +132,13 @@ png('Figures/FigureS2.png', width = 86*1.2, height = 86*2, res = 200,  units = '
 print(p)
 dev.off()
 
+pValues <- sapply(unique(C10X$CT), function(X){
+  t.test(C10X[C10X$CT == X,]$MTRATIO, mu = 0.05, alternative = 'less')$p.value
+})
+sum(pValues > 0.05)
+round(mean(pValues > 0.05)*100,1)
+unique(C10X$CT)[pValues > 0.05]
+
 
 C10X <- MT[MT$PROTOCOL == '10x chromium' & MT$SP == 'Mus musculus' &  MT$CT != 'Unknown',]
 C10X$CT[C10X$CT == 'Erythroid-like and erythroid precursor cells'] <- 'Erythroid precursor cells'
@@ -205,6 +212,13 @@ C10X$TISSUE[C10X$TISSUE == 'Cortex 3'] <- 'Cortex'
 tT <- table(C10X$TISSUE)
 C10X$TISSUE <- as.factor(C10X$TISSUE)
 levels(C10X$TISSUE) <- paste0(names(tT), ' (', tT, ')')
+
+q75 <- sapply(unique(C10X$TISSUE), function(X){
+  quantile(C10X[C10X$TISSUE == X,]$MTRATIO, 0.75)
+})
+
+sum(q75 > 0.05)
+writeLines(as.character(unique(C10X$TISSUE)[q75 > 0.05]), sep = ', ')
 
 p <- ggplot(C10X, aes(x=TISSUE, y=MTRATIO)) + 
   geom_boxplot(outlier.shape = NA) + theme_bw(base_size = 10) + coord_flip() +
